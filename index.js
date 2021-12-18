@@ -9,6 +9,8 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
+// https://guarded-thicket-98440.herokuapp.com/morning
+
 
 app.use(cors());
 app.use(express.json());
@@ -21,32 +23,19 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        const database = client.db('stCar');
-        const productsCollection = database.collection('products');
+        const database = client.db('stBlogs');
+        const blogsCollection = database.collection('blogs');
         const usersCollection = database.collection('users');
-        const ordersCollection = database.collection('orders');
-        const reviewsCollection = database.collection('reviews');
 
         // GET API ************************************************ Get****************************
 
-        // Get all products
-        app.get('/products', async (req, res) => {
-            const cursor = productsCollection.find({});
-            const products = await cursor.toArray();
-            res.send(products);
+        // Get all blogs
+        app.get('/blogs', async (req, res) => {
+            const cursor = blogsCollection.find({});
+            const blogs = await cursor.toArray();
+            res.send(blogs);
         });
-        // Get all orders
-        app.get('/orders', async (req, res) => {
-            const cursor = ordersCollection.find({});
-            const orders = await cursor.toArray();
-            res.send(orders);
-        });
-        // Get all reviewss
-        app.get('/reviews', async (req, res) => {
-            const cursor = reviewsCollection.find({});
-            const orders = await cursor.toArray();
-            res.send(orders);
-        });
+
         // Get all users
         app.get('/users', async (req, res) => {
             const cursor = usersCollection.find({});
@@ -56,60 +45,27 @@ async function run() {
 
 
         // Get single product
-        app.get('/products/:id', async (req, res) => {
+        app.get('/blogs/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const user = await productsCollection.findOne(query);
+            const user = await blogsCollection.findOne(query);
             // console.log('load user with id: ', id);
             res.send(user);
         });
 
-        // User admin or not
-        app.get('/users/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { email: email };
-            const user = await usersCollection.findOne(query);
-            let isAdmin = false;
-            if (user?.role === 'admin') {
-                isAdmin = true;
-            }
-            res.json({ admin: isAdmin });
-        });
 
-
-
-        // Kaj kortche na 
-        app.get('/orders/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { userEmail: email };
-
-            console.log(email);
-            console.log(query);
-            const user = await ordersCollection.find({ userEmail: email });
-            console.log('load user with id: ', user);
-            res.send(user);
-            // res.send('Orders');
-        });
 
 
         // POST API *************************************************Post ******************************************
-        // Post Single products
-        app.post('/products', async (req, res) => {
+        // Post Single blogs
+        app.post('/blogposts', async (req, res) => {
             const newService = req.body;
-            const result = await productsCollection.insertOne(newService);
-            // console.log('got new user', newService);
+            const result = await blogsCollection.insertOne(newService);
+            console.log('got new user', newService);
             // console.log('added user', result);
             res.json(result);
         });
 
-        //Post Single order
-        app.post('/orders', async (req, res) => {
-            const newOrder = req.body;
-            const result = await ordersCollection.insertOne(newOrder);
-            // console.log('got new user', newOrder);
-            // console.log('added user', result);
-            res.json(result);
-        });
 
         //Post Single user
         app.post('/users', async (req, res) => {
@@ -120,15 +76,6 @@ async function run() {
             res.json(result);
         });
 
-        //Post Single review
-        app.post('/reviews', async (req, res) => {
-            const newReview = req.body;
-            console.log(newReview);
-            const result = await reviewsCollection.insertOne(newReview);
-            // console.log('got new user', newOrder);
-            // console.log('added user', result);
-            res.json(result);
-        });
 
 
 
@@ -142,30 +89,9 @@ async function run() {
 
         //UPDATE API ********************************************* Update**************************************
 
-        // Role change of user
-        app.put('/users/admin', async (req, res) => {
-            const user = req.body;
-            const filter = { email: user.email };
-            console.log(filter);
-            // const options = { upsert: true };
-            const updateDoc = { $set: { role: 'admin' } };
-            const result = await usersCollection.updateOne(filter, updateDoc);
-            res.json(result);
-        });
-
-
-        // Google sign er jnno
-        app.put('/users', async (req, res) => {
-            const user = req.body;
-            const filter = { email: user.email };
-            const options = { upsert: true };
-            const updateDoc = { $set: user };
-            const result = await usersCollection.updateOne(filter, updateDoc, options);
-            res.json(result);
-        });
 
         //  Update Order status 
-        app.put('/orders/:id', async (req, res) => {
+        app.put('/blogs/:id', async (req, res) => {
             const id = req.params.id;
             const updatedOrder = req.body;
             // console.log('updating req', updatedUser)
@@ -179,50 +105,20 @@ async function run() {
 
 
 
-        // Update Single Order 
-        // app.put('/orders/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const updatedUser = req.body;
-        //     // console.log('updating req', updatedUser)
-        //     const filter = { _id: ObjectId(id) };
-        //     const options = { upsert: true };
-        //     const updateDoc = {
-        //         $set: {
-        //             userName: updatedUser.userName,
-        //             serviceName: updatedUser.serviceName,
-        //             address: updatedUser.address,
-        //             phone: updatedUser.phone,
-        //             status: updatedUser.status
-
-        //         },
-        //     };
-        //     const result = await ordersCollection.updateOne(filter, updateDoc, options)
-        //     // console.log('updating', id)
-        //     res.json(result)
-        // });
-
 
 
 
 
         // // DELETE  API **************************************** Delete *************************************
 
-        //Delete Single Order
-        app.delete('/orders/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await ordersCollection.deleteOne(query);
 
-
-            res.json(result);
-        });
 
         //Delete Single Product
-        app.delete('/products/:id', async (req, res) => {
+        app.delete('/blogs/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
             const query = { _id: ObjectId(id) };
-            const result = await productsCollection.deleteOne(query);
+            const result = await blogsCollection.deleteOne(query);
 
             // console.log('deleting user with id ', result);
             res.json(result);
@@ -235,18 +131,18 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Running ST Cars');
+    res.send('Running ST Blogs');
 });
 app.get('/morning', (req, res) => {
     res.send('Morning');
 });
 app.get('/hello', (req, res) => {
-    res.send('Hello ST Cars');
+    res.send('Hello ST Blogs');
 });
 
 
 app.listen(port, () => {
-    console.log('ST Cars running at', port);
+    console.log('ST Blogs running at', port);
 });
 
 // done all
