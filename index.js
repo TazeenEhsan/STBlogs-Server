@@ -67,30 +67,9 @@ async function run() {
         });
 
 
-        //Post Single user
-        app.post('/users', async (req, res) => {
-            const newUser = req.body;
-            const result = await usersCollection.insertOne(newUser);
-            // console.log('got new user', newOrder);
-            // console.log('added user', result);
-            res.json(result);
-        });
-
-
-
-
-
-
-
-
-
-
-
-
         //UPDATE API ********************************************* Update**************************************
 
 
-        //  Update Order status 
         app.put('/blogs/:id', async (req, res) => {
             const id = req.params.id;
             const updatedOrder = req.body;
@@ -99,19 +78,12 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = { $set: { status: updatedOrder.orderstatus } };
             const result = await ordersCollection.updateOne(filter, updateDoc, options)
-            // console.log('updating', id)
+
             res.json(result)
         });
 
 
-
-
-
-
-
         // // DELETE  API **************************************** Delete *************************************
-
-
 
         //Delete Single Product
         app.delete('/blogs/:id', async (req, res) => {
@@ -119,13 +91,11 @@ async function run() {
             console.log(id);
             const query = { _id: ObjectId(id) };
             const result = await blogsCollection.deleteOne(query);
-
-            // console.log('deleting user with id ', result);
             res.json(result);
         });
     }
     finally {
-        // await client.close();
+
     }
 }
 run().catch(console.dir);
@@ -134,7 +104,7 @@ app.get('/', (req, res) => {
     res.send('Running ST Blogs');
 });
 app.get('/morning', (req, res) => {
-    res.send('Morning');
+    res.send('Good Morning Everyone');
 });
 app.get('/hello', (req, res) => {
     res.send('Hello ST Blogs');
@@ -145,4 +115,4 @@ app.listen(port, () => {
     console.log('ST Blogs running at', port);
 });
 
-// done all
+
