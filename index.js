@@ -103,7 +103,7 @@ run().catch(console.dir);
 app.get('/', (req, res) => {
     res.send('Running ST Blogs');
 });
-app.get('/morning', (req, res) => {
+app.get('/travel', (req, res) => {
     res.send('Good Morning Everyone');
 });
 app.get('/hello', (req, res) => {
